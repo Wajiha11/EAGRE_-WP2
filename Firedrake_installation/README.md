@@ -1,1 +1,1 @@
-
+1. slack_comments_number are screenshots refer to the problem I faced when I installed Firedrake and something updated in the software which made it stop working. I had to reinstall the software. The comments given to me by the developer are shown in the screenshots.
