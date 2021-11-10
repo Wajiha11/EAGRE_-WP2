@@ -54,4 +54,41 @@ You can review the materials from yesterdays session summarised below:
 
 If you have any questions before next week’s session just submit a ticket to the team via https://bit.ly/arc-help
 
+Hi Everyone,
+
+ 
+
+Thanks for attending SWD1a Part 4 yesterday and for completing the course! We hope you found it useful in getting your python journeys started.
+
+ 
+
+You can review the materials from the course session summarised below:
+
+-        Recording of session 1 - https://web.microsoftstream.com/video/c00dff68-9100-4475-9835-52461749a264?list=studio
+
+-        Recording of session 2 - https://web.microsoftstream.com/video/e3d98e25-94c7-4038-9069-c4e1d0701cc5?list=studio
+
+-        Recording of session 3 - https://web.microsoftstream.com/video/df5c04fa-c3a3-4b43-a572-a6a6eaba7867?list=studio
+
+-        Recording of session 4 - https://web.microsoftstream.com/video/e357cd41-32f5-4163-b638-8db1e20cef42
+
+-        Hackpad - https://hackmd.io/@research-computing-leeds/swd1a-python-10-2021
+
+-        Lesson notes - https://arctraining.github.io/python-2021-04/
+
+-        GitHub repository with instructor notebooks - https://github.com/ARCTraining/python-2021-04/tree/gh-pages/notebooks
+
+-        Kaggle (next step) - https://www.kaggle.com/
+
+-        Exercism Python (next step) - https://exercism.org/tracks/python
+
+If you have any questions before next week’s session just submit a ticket to the team via https://bit.ly/arc-help
+
+ 
+
+Thanks,
+
+ 
+
+Alex Coleman
  
