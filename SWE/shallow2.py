@@ -9,14 +9,11 @@ Created on Mon Dec  6 19:20:39 2021
 import firedrake as fd
 import math
 import numpy as np
-
+from matplotlib import animation, pyplot as plt
 '''
 Select the case:
     case 1 : VP solved by firedrake to compute the eqs of motion
     case 2 : VP solved to weak forms of the imposed eqs of motions manually
-
-Note: Uncomment the section "### EXACT SOLUTION #########" to get the exact solution and then comment it again to run case 2 and case 3. The results of 
-exact , case 1 and case 2 will be saved in separate folders. Use Paraview to visualise the results.
 '''
 case = 2
 
@@ -45,7 +42,7 @@ print('time step size =', dt)
 ts = int(t_end/dt)
 print('time_steps =', ts)
 theta = fd.pi/4
-
+xvals = np.linspace(0, 0.99, 100) 
 
 ## Define function spaces  ##
 V = fd.FunctionSpace(mesh, "CG", 1)
@@ -72,13 +69,17 @@ ic2 = eta.interpolate(-E* k * fd.cos(k*x[0])*fd.cos(k*t + theta))
 phi.assign(ic1)
 phi_new.assign(ic1)
 
+x_slice = np.linspace(0, 1,n)
 
 eta.assign(ic2)
 eta_new.assign(ic2)
 
+plt.figure(1)
+plt.title(r'Eta value at the centre of the domain')
+plt.xlabel(r'$x$ ')
+plt.ylabel(r'$\eta$ ')
 
-
-### EXACT SOLUTION #########
+# ## EXACT SOLUTION #########
 # outfile_phi_exact = fd.File("results_exact/phi.pvd")
 # outfile_eta_exact = fd.File("results_exact/eta.pvd")
 
@@ -88,6 +89,8 @@ eta_new.assign(ic2)
 #     t += dt
 #     outfile_eta_exact.write( eta_exact )
 #     outfile_phi_exact.write( phi_exact )
+# etavals = np.array([eta_exact.at(x, 0.5) for x in xvals])
+# plt.plot(xvals, etavals)
 
 
 ### VARIATIONAL PRINCIPLE #########
@@ -108,14 +111,15 @@ if case ==1:
     
     ######### TIME LOOP ############
     while (t <= t_end):
-        fd.solve(eta_expr ==0, eta_new)
+        fd.solve(eta_expr == 0, eta_new)
         eta.assign(eta_new)
         fd.solve(phi_expr == 0 , phi_new)
         phi.assign(phi_new)
         t += dt
         outfile_eta.write( eta )
         outfile_phi.write( phi )
-        
+    etavals = np.array([eta.at(x, 0.5) for x in xvals])
+    plt.plot(xvals, etavals) 
         
 elif case == 2:
     print("You have selected case 2 : VP solved to weak forms of the imposed eqs of motions manually")
@@ -142,11 +146,19 @@ elif case == 2:
         t += dt
         outfile_eta.write( eta )
         outfile_phi.write( phi )
-     
+        
+    
+    etavals = np.array([eta.at(x, 0.5) for x in xvals])
+    plt.plot(xvals, etavals)
+    plt.title(r'Eta value at the centre of the domain')
+    plt.xlabel(r'$x$ ')
+    plt.ylabel(r'$\eta$ ')
+        
     
     
     
     
+plt.show()     
     
     
     
