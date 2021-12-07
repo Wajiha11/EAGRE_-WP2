@@ -16,7 +16,7 @@ Select the case:
     case 2 : VP solved to weak forms of the imposed eqs of motions manually
 
 Note: Uncomment the section "### EXACT SOLUTION #########" to get the exact solution and then comment it again to run case 2 and case 3. The results of 
-exact , case 1 and case 2 will be saved in separate folders. 
+exact , case 1 and case 2 will be saved in separate folders. Use Paraview to visualise the results.
 '''
 case = 2
 
