@@ -14,7 +14,9 @@ import numpy as np
 Select the case:
     case 1 : VP solved by firedrake to compute the eqs of motion
     case 2 : VP solved to weak forms of the imposed eqs of motions manually
-    case 3 : VP solved to weak forms of the imposed eqs of motions manually (modified Jonny's code')
+
+Note: Uncomment the section "### EXACT SOLUTION #########" to get the exact solution and then comment it again to run case 2 and case 3. The results of 
+exact , case 1 and case 2 will be saved in separate folders. 
 '''
 case = 2
 
@@ -73,6 +75,8 @@ phi_new.assign(ic1)
 
 eta.assign(ic2)
 eta_new.assign(ic2)
+
+
 
 ### EXACT SOLUTION #########
 # outfile_phi_exact = fd.File("results_exact/phi.pvd")
@@ -138,9 +142,7 @@ elif case == 2:
         t += dt
         outfile_eta.write( eta )
         outfile_phi.write( phi )
-        
-elif case == 3:
-    print("case 3 : VP solved to weak forms of the imposed eqs of motions manually (modified Jonny's code)")     
+     
     
     
     
