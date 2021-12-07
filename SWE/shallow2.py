@@ -12,8 +12,11 @@ import numpy as np
 from matplotlib import animation, pyplot as plt
 '''
 Select the case:
-    case 1 : VP solved by firedrake to compute the eqs of motion
+    case 1 : VP solved by firedrake to compute the eqs of motion by using fd. derivative
     case 2 : VP solved to weak forms of the imposed eqs of motions manually
+    Note: First Uncomment the (EXACT SOLUTION) section to get the exact solution, then comment it and run either case 1 or case 2.
+    If I run the code after uncommenting the (EXACT SOLUTION) then case 1 and case 2 does not produce results. Still searching why.
+    case 1 gives wrong results while case 2 gives results close to exact solution.
 '''
 case = 2
 
