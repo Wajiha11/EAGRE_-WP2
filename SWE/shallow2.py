@@ -36,7 +36,7 @@ k = (2* fd.pi * m) /(2* fd.pi)
 print('k =',k)
 Tp = (2* fd.pi ) /k
 print('Tp =',Tp)
-t_end = Tp# time of simulation in sec
+t_end = 1*Tp# time of simulation in sec
 print('End time =', t_end)
 # dt = 0.005 # time step [s]  n/t_end
 dx= 1/n
@@ -59,13 +59,16 @@ phi_new = fd.Function(V, name = "phi_new") # phi^n+1
 eta = fd.Function(V, name =  "eta") # eta^n
 eta_new = fd.Function(V, name =  "eta_new") # eta^n+1
 
+phie= fd.Function(V, name = "phi_exact") 
+etae = fd.Function(V, name = "eta_exact") 
+
 ######  Define initial conditions  ############
 Cc = 1
 Dc = 1
 E = (Cc*Cc + Dc*Dc)**0.5 # E', E=E'A, the constant A is chosen to be 1.
 theta = np.arctan(Cc/Dc)
 
-ic1 = phi.interpolate(E * fd.cos(k*x[0])*fd.sin(k*t + theta))
+ic1 = phi.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
 ic2 = eta.interpolate(-E* k * fd.cos(k*x[0])*fd.cos(k*t + theta))
 
 
@@ -77,23 +80,35 @@ x_slice = np.linspace(0, 1,n)
 eta.assign(ic2)
 eta_new.assign(ic2)
 
-plt.figure(1)
-plt.title(r'Eta value at the centre of the domain')
-plt.xlabel(r'$x$ ')
-plt.ylabel(r'$\eta$ ')
+######## FIGURE SETTINGS ###########
 
-# ## EXACT SOLUTION #########
+# plt.figure(1)
+fig, (ax1, ax2) = plt.subplots(1, 2)
+ax1.set_title(r'$\eta$ value at the centre of the domain')
+ax2.set_title(r'$\phi$ value at the centre of the domain')
+ax1.set_xlabel(r'$x$ ')
+ax1.set_ylabel(r'$\eta$ ')
+ax2.set_xlabel(r'$x$ ')
+ax2.set_ylabel(r'$\phi$ ')
+
+# ###### EXACT SOLUTION #########
 # outfile_phi_exact = fd.File("results_exact/phi.pvd")
 # outfile_eta_exact = fd.File("results_exact/eta.pvd")
 
 # while ( t <= t_end):
-#     phi_exact= phi.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
-#     eta_exact = eta.interpolate(-E * k * fd.cos(k*x[0]) * fd.cos(k*t + theta))
+#     phi_exact= phie.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
+#     eta_exact = etae.interpolate(-E * k * fd.cos(k*x[0]) * fd.cos(k*t + theta))
 #     t += dt
-#     outfile_eta_exact.write( eta_exact )
-#     outfile_phi_exact.write( phi_exact )
-# etavals = np.array([eta_exact.at(x, 0.5) for x in xvals])
-# plt.plot(xvals, etavals)
+#     # outfile_eta_exact.write( eta_exact )
+#     # outfile_phi_exact.write( phi_exact )
+# etaevals = np.array([eta_exact.at(x, 0.5) for x in xvals])
+# phievals = np.array([phi_exact.at(x, 0.5) for x in xvals])
+# print('phi_exact =', phievals)
+# print('eta_exact =', etaevals)
+# ax1.plot(xvals, etaevals, '--',label = '$\eta$ Exact')
+# # #ax1.legend(loc='upper right')
+# ax2.plot(xvals, phievals, '--',label = '$\phi$ Exact')
+# # #ax2.legend(loc='upper left')
 
 
 ### VARIATIONAL PRINCIPLE #########
@@ -121,45 +136,47 @@ if case ==1:
         t += dt
         outfile_eta.write( eta )
         outfile_phi.write( phi )
-    etavals = np.array([eta.at(x, 0.5) for x in xvals])
-    plt.plot(xvals, etavals) 
-        
-elif case == 2:
-    print("You have selected case 2 : VP solved to weak forms of the imposed eqs of motions manually")
-    a_phi = fd.inner( trial, v ) * fd.dx
-    # L_phi = fd.inner( (phi - dt * eta_new), v ) * fd.dx 
-    L_phi = fd.inner( (phi - dt * eta), v ) * fd.dx
-    LVP_phi = fd.LinearVariationalProblem(a_phi, L_phi, phi)
+    eta1vals = np.array([eta.at(x, 0.5) for x in xvals])
+    phi1vals = np.array([phi.at(x, 0.5) for x in xvals])
+    # print('phi_case1 =', phi1vals)
+    # print('eta_case1 =', eta1vals)
     
-    a_eta = fd.inner( trial, v ) * fd.dx
-    # L_eta = (v * eta + dt * fd.inner(fd.grad(phi), fd.grad(v)) ) * fd.dx
-    L_eta =  ( fd.inner( eta,v) + dt * fd.inner(fd.grad(phi), fd.grad(v)) ) * fd.dx 
-    LVP_eta = fd.LinearVariationalProblem(a_eta, L_eta, eta)
-    LVS_phi = fd.LinearVariationalSolver(LVP_phi)
-    LVS_eta = fd.LinearVariationalSolver(LVP_eta)
+    ax1.plot(xvals, eta1vals, label = 'Case1 : $\eta$')
+    ax1.legend(loc=2)
+    ax2.plot(xvals,phi1vals, label = 'Case1 : $\phi$')
+    ax2.legend(loc=1) 
+    
+
+    
+elif case == 2:
+    print('case 3')
+      
+    phi_full = (v* (phi_new - phi)/dt  + g*v*eta) * fd.dx
+    phi_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi_full, phi_new))
+    
+    eta_full = (v * (eta_new - eta)/dt - H * fd.inner(fd.grad(v), fd.grad(phi_new)))* fd.dx
+    eta_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(eta_full, eta_new))
     
     ###### OUTPUT FILES ##########
-    outfile_phi = fd.File("results_case2/phi.pvd")
-    outfile_eta = fd.File("results_case2/eta.pvd")   
+    outfile_phi = fd.File("results_case3/phi.pvd")
+    outfile_eta = fd.File("results_case3/eta.pvd")   
     
-    while (t <= t_end):
-        LVS_phi.solve()
-        LVS_eta.solve()
-        # LVS_phi.solve()
-        t += dt
-        outfile_eta.write( eta )
-        outfile_phi.write( phi )
+    while t<= t_end:
+        phi_full.solve()
+        t+= dt
+        eta_full.solve()
+        outfile_eta.write( eta_new )
+        outfile_phi.write( phi_new )
         
+    eta2vals = np.array([eta_new.at(x, 0.5) for x in xvals])
+    phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
+    # print('phi_case2 =', phi3vals)
+    # print('eta_case2 =', eta3vals)
     
-    etavals = np.array([eta.at(x, 0.5) for x in xvals])
-    plt.plot(xvals, etavals)
-    plt.title(r'Eta value at the centre of the domain')
-    plt.xlabel(r'$x$ ')
-    plt.ylabel(r'$\eta$ ')
-        
-    
-    
-    
+    ax1.plot(xvals, eta2vals, label = 'Case2 : $\eta$')
+    ax1.legend(loc=2)
+    ax2.plot(xvals,phi2vals, label = 'Case2 : $\phi$')
+    ax2.legend(loc=1)
     
 plt.show()     
     
