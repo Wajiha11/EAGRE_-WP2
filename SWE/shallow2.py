@@ -119,8 +119,10 @@ if case ==1:
     
     eta_expr = fd.derivative(VP, phi, v)  # derivative of VP wrt phi^n to get the expression for eta^n+1
     print('eta_expression=',eta_expr)
+    eta_expr = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(eta_expr, eta_new))
     phi_expr = fd.derivative(VP, eta_new, v)  # derivative of VP wrt eta^n+1 to get the value of phi^n+1
     print('phi_expression=',phi_expr)
+    phi_expr = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi_expr, phi_new))
     
     ###### OUTPUT FILES ##########
     outfile_phi = fd.File("results_case1/phi.pvd")
@@ -129,24 +131,22 @@ if case ==1:
     
     ######### TIME LOOP ############
     while (t <= t_end):
-        fd.solve(eta_expr == 0, eta_new)
-        eta.assign(eta_new)
-        fd.solve(phi_expr == 0 , phi_new)
-        phi.assign(phi_new)
-        t += dt
-        outfile_eta.write( eta )
-        outfile_phi.write( phi )
-    eta1vals = np.array([eta.at(x, 0.5) for x in xvals])
-    phi1vals = np.array([phi.at(x, 0.5) for x in xvals])
-    # print('phi_case1 =', phi1vals)
-    # print('eta_case1 =', eta1vals)
+        eta_expr.solve()
+        t+= dt
+        phi_expr.solve()
+        outfile_eta.write( eta_new )
+        outfile_phi.write( phi_new )
+
+
+    eta1vals = np.array([eta_new.at(x, 0.5) for x in xvals])
+    phi1vals = np.array([phi_new.at(x, 0.5) for x in xvals])
+
     
     ax1.plot(xvals, eta1vals, label = 'Case1 : $\eta$')
     ax1.legend(loc=2)
     ax2.plot(xvals,phi1vals, label = 'Case1 : $\phi$')
-    ax2.legend(loc=1) 
+    ax2.legend(loc=1)
     
-
     
 elif case == 2:
     print("You have selected case 2 : VP solved to weak forms of the imposed eqs of motions manually")
@@ -170,8 +170,8 @@ elif case == 2:
         
     eta2vals = np.array([eta_new.at(x, 0.5) for x in xvals])
     phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
-    # print('phi_case2 =', phi3vals)
-    # print('eta_case2 =', eta3vals)
+    # print('phi_case2 =', phi2vals)
+    # print('eta_case2 =', eta2vals)
     
     ax1.plot(xvals, eta2vals, label = 'Case2 : $\eta$')
     ax1.legend(loc=2)
