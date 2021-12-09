@@ -136,6 +136,9 @@ if case ==1:
         phi_expr.solve()
         outfile_eta.write( eta_new )
         outfile_phi.write( phi_new )
+        # set-up next time-step
+        phi.assign(phi_new)
+        eta.assign(eta_new)
 
 
     eta1vals = np.array([eta_new.at(x, 0.5) for x in xvals])
@@ -167,7 +170,9 @@ elif case == 2:
         eta_full.solve()
         outfile_eta.write( eta_new )
         outfile_phi.write( phi_new )
-        
+        # set-up next time-step
+        phi.assign(phi_new)
+        eta.assign(eta_new)
     eta2vals = np.array([eta_new.at(x, 0.5) for x in xvals])
     phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
     # print('phi_case2 =', phi2vals)
