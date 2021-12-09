@@ -149,7 +149,7 @@ if case ==1:
     
     
 elif case == 2:
-    print("You have selected case 2 : VP solved to weak forms of the imposed eqs of motions manually")
+    print("You have selected case 2 : The weak form of the imposed eqs of motions is solved manually")
       
     phi_full = (v* (phi_new - phi)/dt  + g*v*eta) * fd.dx
     phi_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi_full, phi_new))
