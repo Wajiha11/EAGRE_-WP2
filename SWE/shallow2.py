@@ -18,25 +18,25 @@ Select the case:
     If I run the code after uncommenting the (EXACT SOLUTION) then case 1 and case 2 does not produce results. Still searching why.
     case 1 gives wrong results while case 2 gives results close to exact solution.
 '''
-case = 2
+case = 1
 
 ##  mesh ##
-n = 15
+n = 35
 mesh = fd.UnitSquareMesh(n, n)
 x = fd.SpatialCoordinate(mesh)
 
 
 ######### PARAMETERS   ###############
 
-g = 9.8 # gravitational acceleration
+g = 1 # gravitational acceleration
 H = 1 # water depth
 t = 0
-m = 3
-k = (2* fd.pi * m) /(2* fd.pi)
+m = 2
+k = (2* fd.pi * m) /1
 print('k =',k)
 Tp = (2* fd.pi ) /k
 print('Tp =',Tp)
-t_end = 1*Tp# time of simulation in sec
+t_end = 2*Tp# time of simulation in sec
 print('End time =', t_end)
 # dt = 0.005 # time step [s]  n/t_end
 dx= 1/n
@@ -82,7 +82,7 @@ eta_new.assign(ic2)
 
 ######## FIGURE SETTINGS ###########
 
-# plt.figure(1)
+
 fig, (ax1, ax2) = plt.subplots(1, 2)
 ax1.set_title(r'$\eta$ value at the centre of the domain')
 ax2.set_title(r'$\phi$ value at the centre of the domain')
@@ -91,7 +91,7 @@ ax1.set_ylabel(r'$\eta$ ')
 ax2.set_xlabel(r'$x$ ')
 ax2.set_ylabel(r'$\phi$ ')
 
-# ###### EXACT SOLUTION #########
+###### EXACT SOLUTION #########
 # outfile_phi_exact = fd.File("results_exact/phi.pvd")
 # outfile_eta_exact = fd.File("results_exact/eta.pvd")
 
@@ -99,16 +99,16 @@ ax2.set_ylabel(r'$\phi$ ')
 #     phi_exact= phie.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
 #     eta_exact = etae.interpolate(-E * k * fd.cos(k*x[0]) * fd.cos(k*t + theta))
 #     t += dt
-#     # outfile_eta_exact.write( eta_exact )
-#     # outfile_phi_exact.write( phi_exact )
+#     outfile_eta_exact.write( eta_exact )
+#     outfile_phi_exact.write( phi_exact )
 # etaevals = np.array([eta_exact.at(x, 0.5) for x in xvals])
 # phievals = np.array([phi_exact.at(x, 0.5) for x in xvals])
-# print('phi_exact =', phievals)
-# print('eta_exact =', etaevals)
-# ax1.plot(xvals, etaevals, '--',label = '$\eta$ Exact')
-# # #ax1.legend(loc='upper right')
-# ax2.plot(xvals, phievals, '--',label = '$\phi$ Exact')
-# # #ax2.legend(loc='upper left')
+# #print('phi_exact =', phievals)
+# #print('eta_exact =', etaevals)
+# ax1.plot(xvals, etaevals,label = '$\eta$ Exact')
+# ax1.legend(loc=2)
+# ax2.plot(xvals, phievals,label = '$\phi$ Exact')
+# ax2.legend(loc=1)
 
 
 ### VARIATIONAL PRINCIPLE #########
@@ -134,12 +134,13 @@ if case ==1:
         eta_expr.solve()
         t+= dt
         phi_expr.solve()
+        
         outfile_eta.write( eta_new )
         outfile_phi.write( phi_new )
+        
         # set-up next time-step
         phi.assign(phi_new)
         eta.assign(eta_new)
-
 
     eta1vals = np.array([eta_new.at(x, 0.5) for x in xvals])
     phi1vals = np.array([phi_new.at(x, 0.5) for x in xvals])
@@ -149,34 +150,37 @@ if case ==1:
     ax1.legend(loc=2)
     ax2.plot(xvals,phi1vals, label = 'Case1 : $\phi$')
     ax2.legend(loc=1)
-    
+
     
 elif case == 2:
-    print("You have selected case 2 : The weak form of the imposed eqs of motions is solved manually")
       
-    phi_full = (v* (phi_new - phi)/dt  + g*v*eta) * fd.dx
-    phi_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi_full, phi_new))
+    print('You have selected case 2: First calculats eta^n+1 and then calculats phi^(n+1) like the given problem')
+    eta2_full = (v * (eta_new - eta)/dt - H * fd.inner(fd.grad(v), fd.grad(phi)))* fd.dx
+    eta2_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(eta2_full, eta_new))
     
-    eta_full = (v * (eta_new - eta)/dt - H * fd.inner(fd.grad(v), fd.grad(phi_new)))* fd.dx
-    eta_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(eta_full, eta_new))
+    phi2_full = (v* (phi_new - phi)/dt  + g*v*eta_new) * fd.dx
+    phi2_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi2_full, phi_new))
+    
     
     ###### OUTPUT FILES ##########
-    outfile_phi = fd.File("results_case3/phi.pvd")
-    outfile_eta = fd.File("results_case3/eta.pvd")   
+    outfile_phi = fd.File("results_case2/phi.pvd")
+    outfile_eta = fd.File("results_case2/eta.pvd")
     
     while t<= t_end:
-        phi_full.solve()
+        eta2_full.solve()
         t+= dt
-        eta_full.solve()
+        phi2_full.solve()
         outfile_eta.write( eta_new )
         outfile_phi.write( phi_new )
+        
         # set-up next time-step
         phi.assign(phi_new)
         eta.assign(eta_new)
+        
     eta2vals = np.array([eta_new.at(x, 0.5) for x in xvals])
     phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
-    # print('phi_case2 =', phi2vals)
-    # print('eta_case2 =', eta2vals)
+    # print('phi_case2 =', phi3vals)
+    # print('eta_case2 =', eta3vals)
     
     ax1.plot(xvals, eta2vals, label = 'Case2 : $\eta$')
     ax1.legend(loc=2)
