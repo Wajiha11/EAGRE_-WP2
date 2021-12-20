@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec  6 19:20:39 2021
+Created on Wed Dec  8 10:35:43 2021
 
 @author: mmwr
 """
@@ -13,43 +13,66 @@ from matplotlib import animation, pyplot as plt
 '''
 Select the case:
     case 1 : VP solved by firedrake to compute the eqs of motion by using fd. derivative
-    case 2 : VP solved to  get the weak form of the imposed eqs of motions manually
+    case 2 : VP solved to weak forms of the imposed eqs of motions manually
     Note: First Uncomment the (EXACT SOLUTION) section to get the exact solution, then comment it and run either case 1 or case 2.
     If I run the code after uncommenting the (EXACT SOLUTION) then case 1 and case 2 does not produce results. Still searching why.
+    case 1 gives wrong results while case 2 gives results close to exact solution.
 '''
 case = 1
 
 ##  mesh ##
-n = 35
+n = 79 #99
 mesh = fd.UnitSquareMesh(n, n)
-x = fd.SpatialCoordinate(mesh)
-
+x,y = fd.SpatialCoordinate(mesh)
+Lx = 1
+Ly = 1
+xvals = np.linspace(0, 0.99, 100)
+yvals = np.linspace(0, 0.99, 100) 
+yslice = 0.5
+xslice = 0.5
 
 ######### PARAMETERS   ###############
 
-g = 1 # gravitational acceleration
+g = 9.8 # gravitational acceleration
 H = 1 # water depth
 t = 0
 m = 2
-k = (2* fd.pi * m) /1
+m1 = 2
+m2 = 2
+
+k1 = (2* fd.pi * m1) /Lx
+print('k1 =',k1)
+
+k2 = (2* fd.pi * m2) /Ly
+print('k2 =',k2)
+
+c = np.sqrt(g*H)
+
+w = c * np.sqrt(k1**2 + k2**2)
+
+k = np.sqrt(k1**2 + k2**2)
 print('k =',k)
-Tp = (2* fd.pi ) /k
+
+Tp = (2* fd.pi ) /w
 print('Tp =',Tp)
+
 t_end = 2*Tp# time of simulation in sec
 print('End time =', t_end)
+
 # dt = 0.005 # time step [s]  n/t_end
 dx= 1/n
-dt = 0.005 # dx/(16*np.pi)
+dt = 0.001 # dx/(16*np.pi)
 print('time step size =', dt)
+
 ts = int(t_end/dt)
 print('time_steps =', ts)
-theta = fd.pi/4
-xvals = np.linspace(0, 0.99, 100) 
+
 
 ## Define function spaces  ##
 V = fd.FunctionSpace(mesh, "CG", 1)
 
-## Define Functions ##
+
+#### Define Function Spaces ####
 trial = fd.TrialFunction(V)
 print( 'The shape of trail funcion is= ',np.shape(trial))
 v = fd.TestFunction(V)
@@ -62,56 +85,73 @@ phie= fd.Function(V, name = "phi_exact")
 etae = fd.Function(V, name = "eta_exact") 
 
 ######  Define initial conditions  ############
-Cc = 1
-Dc = 1
-E = (Cc*Cc + Dc*Dc)**0.5 # E', E=E'A, the constant A is chosen to be 1.
-theta = np.arctan(Cc/Dc)
+A = 1
+B = 1
 
-ic1 = phi.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
-ic2 = eta.interpolate(-E* k * fd.cos(k*x[0])*fd.cos(k*t + theta))
+
+ic1 = phi.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( -A*fd.sin(w*t) + B*fd.cos(w*t) ) * (g/w) )
+ic2 = eta.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( A*fd.cos(w*t) + B*fd.sin(w*t) ) )
 
 
 phi.assign(ic1)
 phi_new.assign(ic1)
 
-x_slice = np.linspace(0, 1,n)
 
 eta.assign(ic2)
 eta_new.assign(ic2)
 
 ######## FIGURE SETTINGS ###########
 
+# plt.figure(1)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+# fig, (ax1, ax2) = plt.subplots(1, 2)
+ax1.set_title(r'$\eta$ value in $x$ direction')
+ax2.set_title(r'$\phi$ value in $x$ direction')
+ax3.set_title(r'$\eta$ value in $y$ direction')
+ax4.set_title(r'$\phi$ value in $y$ direction')
 
-fig, (ax1, ax2) = plt.subplots(1, 2)
-ax1.set_title(r'$\eta$ value at the centre of the domain')
-ax2.set_title(r'$\phi$ value at the centre of the domain')
 ax1.set_xlabel(r'$x$ ')
 ax1.set_ylabel(r'$\eta$ ')
 ax2.set_xlabel(r'$x$ ')
 ax2.set_ylabel(r'$\phi$ ')
+ax3.set_xlabel(r'$y$ ')
+ax3.set_ylabel(r'$\eta$ ')
+ax4.set_xlabel(r'$y$ ')
+ax4.set_ylabel(r'$\phi$ ')
 
 ###### EXACT SOLUTION #########
+
+phi_exact= phie.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( -A*fd.sin(w*t_end) + B*fd.cos(w*t_end) )*(g/w) )
+eta_exact = etae.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( A*fd.cos(w*t_end) + B*fd.sin(w*t_end) ) )
+
 # outfile_phi_exact = fd.File("results_exact/phi.pvd")
 # outfile_eta_exact = fd.File("results_exact/eta.pvd")
 
 # while ( t <= t_end):
-#     phi_exact= phie.interpolate(E * fd.cos(k*x[0]) * fd.sin(k*t + theta))
-#     eta_exact = etae.interpolate(-E * k * fd.cos(k*x[0]) * fd.cos(k*t + theta))
+#     phi_exact= phie.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( -A*fd.sin(w*t) + B*fd.cos(w*t) ) * (g/w) )
+#     eta_exact = etae.interpolate( fd.cos(k1 * x) * fd.cos(k2 * y) * ( A*fd.cos(w*t) + B*fd.sin(w*t) ) )
 #     t += dt
 #     outfile_eta_exact.write( eta_exact )
 #     outfile_phi_exact.write( phi_exact )
-# etaevals = np.array([eta_exact.at(x, 0.5) for x in xvals])
-# phievals = np.array([phi_exact.at(x, 0.5) for x in xvals])
-# #print('phi_exact =', phievals)
-# #print('eta_exact =', etaevals)
-# ax1.plot(xvals, etaevals,label = '$\eta$ Exact')
-# ax1.legend(loc=2)
-# ax2.plot(xvals, phievals,label = '$\phi$ Exact')
-# ax2.legend(loc=1)
+
+
+etaevals = np.array([eta_exact.at(x, yslice) for x in xvals])
+phievals = np.array([phi_exact.at(x, yslice) for x in xvals])
+
+etaevalsy = np.array([eta_exact.at(xslice, y) for y in yvals])
+phievalsy =  np.array([phi_exact.at(xslice, y) for y in yvals])
+
+ax1.plot(xvals, etaevals, '--',label = '$Exact: \eta_x$ ')
+ax2.plot(xvals, phievals, '--',label = '$Exact: \phi_x$ ')
+ax3.plot(yvals, etaevalsy, '--',label = '$Exact: \eta_y$ ')
+ax4.plot(yvals, phievalsy, '--',label = '$Exact: \phi_y$ ')
+
+# #ax1.legend(loc='upper right')
+# #ax2.legend(loc='upper left')
 
 
 ### VARIATIONAL PRINCIPLE #########
-if case ==1:
+if case == 1:
     print("You have selected case 1 : VP solved by firedrake to compute the eqs of motion ")
 
     VP = ( fd.inner ((eta_new - eta)/dt , phi) - fd.inner(phi_new , (eta_new/dt)) - (1/2 * H * fd.inner(fd.grad(phi), fd.grad(phi))) - (1/2 * g * fd.inner(eta_new,eta_new)) ) * fd.dx
@@ -141,19 +181,28 @@ if case ==1:
         phi.assign(phi_new)
         eta.assign(eta_new)
 
-    eta1vals = np.array([eta_new.at(x, 0.5) for x in xvals])
-    phi1vals = np.array([phi_new.at(x, 0.5) for x in xvals])
 
+    eta1vals = np.array([eta_new.at(x, yslice) for x in xvals])
+    phi1vals = np.array([phi_new.at(x, yslice) for x in xvals])
     
-    ax1.plot(xvals, eta1vals, label = 'Case1 : $\eta$')
+    eta1valsy = np.array([eta_new.at(xslice, y) for y in yvals])
+    phi1valsy =  np.array([phi_new.at(xslice, y) for y in yvals])
+    
+    ax1.plot(xvals, eta1vals, label = 'Case1 : $\eta_x$')
+    ax2.plot(xvals,phi1vals, label = 'Case1 : $\phi_x$')
+    ax3.plot(yvals, eta1valsy,label = 'Case1 : $\eta_y$')
+    ax4.plot(yvals,phi1valsy, label = 'Case1 : $\phi_y$')
+    
+    
     ax1.legend(loc=2)
-    ax2.plot(xvals,phi1vals, label = 'Case1 : $\phi$')
     ax2.legend(loc=1)
+    ax3.legend(loc=2)
+    ax4.legend(loc=1)
 
     
 elif case == 2:
       
-    print('You have selected case 2: VP solved to  get the weak form of the imposed eqs of motions manually ')
+    print('You have selected case 2: First calculates eta^n+1 and then phi^(n+1) like the given problem')
     eta2_full = (v * (eta_new - eta)/dt - H * fd.inner(fd.grad(v), fd.grad(phi)))* fd.dx
     eta2_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(eta2_full, eta_new))
     
@@ -162,7 +211,7 @@ elif case == 2:
     
     
     ###### OUTPUT FILES ##########
-    outfile_phi = fd.File("results_case2/phi.pvd")
+    outfile_phi = fd.File("results_case2/phi.pvd") # case 4 in shallow2.py
     outfile_eta = fd.File("results_case2/eta.pvd")
     
     while t<= t_end:
@@ -176,15 +225,25 @@ elif case == 2:
         phi.assign(phi_new)
         eta.assign(eta_new)
         
-    eta2vals = np.array([eta_new.at(x, 0.5) for x in xvals])
-    phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
+    eta2vals = np.array([eta_new.at(x, yslice) for x in xvals])
+    phi2vals = np.array([phi_new.at(x, yslice) for x in xvals])
+    
+    eta2valsy = np.array([eta_new.at(xslice, y) for y in yvals])
+    phi2valsy =  np.array([phi_new.at(xslice, y) for y in yvals])
     # print('phi_case2 =', phi3vals)
     # print('eta_case2 =', eta3vals)
+    ax1.plot(xvals, eta2vals, label = 'Case2 : $\eta_x$')
+    ax2.plot(xvals,phi2vals, label = 'Case2 : $\phi_x$')
+    ax3.plot(yvals, eta2valsy,label = 'Case2 : $\eta_y$')
+    ax4.plot(yvals,phi2valsy, label = 'Case2 : $\phi_y$')
     
-    ax1.plot(xvals, eta2vals, label = 'Case2 : $\eta$')
+    
     ax1.legend(loc=2)
-    ax2.plot(xvals,phi2vals, label = 'Case2 : $\phi$')
     ax2.legend(loc=1)
+    ax3.legend(loc=2)
+    ax4.legend(loc=1)
+
+    
     
 plt.show()     
     
