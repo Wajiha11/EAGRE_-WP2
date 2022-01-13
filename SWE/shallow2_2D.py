@@ -14,9 +14,8 @@ from matplotlib import animation, pyplot as plt
 Select the case:
     case 1 : VP solved by firedrake to compute the eqs of motion by using fd. derivative
     case 2 : VP solved to weak forms of the imposed eqs of motions manually
-    Note: First Uncomment the (EXACT SOLUTION) section to get the exact solution, then comment it and run either case 1 or case 2.
-    If I run the code after uncommenting the (EXACT SOLUTION) then case 1 and case 2 does not produce results. Still searching why.
-    case 1 gives wrong results while case 2 gives results close to exact solution.
+    case 3 : Case 1 and Case 2 will be solved and compared with the exact solution
+    case 4 : Linfty norm of case 1 and case 2
 '''
 case = 4
 
@@ -678,6 +677,9 @@ elif case == 4:
     Linf_px = np.zeros(len(nnt))
     Linf_ey = np.zeros(len(nnt))
     Linf_py = np.zeros(len(nnt))
+    
+    Linf_e = np.zeros(len(nnt))
+    Linf_p = np.zeros(len(nnt))
     # print('length nnt =', len(nnt))
     t = 0
     # while (t <= t_end):
@@ -712,10 +714,24 @@ elif case == 4:
         eta2valsy = np.array([eta2_new.at(xslice, y) for y in yvals])
         phi2valsy =  np.array([phi2_new.at(xslice, y) for y in yvals])
         
-        Linf_ex[nt] = max(eta1vals - eta2vals )
-        Linf_px[nt] = max(phi1vals - phi2vals)
-        Linf_ey[nt] = max(eta1valsy - eta2valsy)
-        Linf_py[nt] = max(phi1valsy - phi2valsy)
+        ## Error in a x and y direction
+        
+        Linf_ex[nt] = max(abs(eta1vals - eta2vals ))
+        Linf_px[nt] = max(abs(phi1vals - phi2vals))
+        Linf_ey[nt] = max(abs(eta1valsy - eta2valsy))
+        Linf_py[nt] = max(abs(phi1valsy - phi2valsy))
+        
+        dif_e = eta1.dat.data - eta2.dat.data
+        dif_p = phi1.dat.data - phi2.dat.data
+        # dif_e1 = assign.(eta1 - eta2)
+        # print(dif_e) ## gives some symbolic expr like w_6 + -1 * w_{14} so I can't use Linf_e[nt] = max(abs(eta1- eta2))
+        
+        ### Error in whole domain 
+        # Linf_e[nt] = max(abs(eta1- eta2))
+        # Linf_p[nt] = max(abs(phi1 - phi2))
+        Linf_e[nt] = max(abs(dif_e))
+        Linf_p[nt] = max(abs(dif_p))
+
         
         # print('Linf_ex =', Linf_ex)
         # print('Linf_px =', Linf_px)
@@ -743,7 +759,31 @@ elif case == 4:
     ax2.plot( nnt, Linf_px, 'r-')
     ax3.plot( nnt, Linf_ey, 'r-')
     ax4.plot(nnt, Linf_py, 'r-')
-        
+    
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    ax1.set_title(r'$\eta$ ',fontsize= 20)
+    ax2.set_title(r'$\phi$ ',fontsize= 20)
+
+    
+    ax1.set_xlabel(r'$t$ ',fontsize=16)
+    # ax1.set_xticklabels(x, fontsize=10)
+    ax1.set_ylabel(r'$ L_{\infty}$-norm  ',fontsize=16)
+    ax1.xaxis.set_tick_params(labelsize=14)
+    ax1.yaxis.set_tick_params(labelsize=14)
+    # ax1.set_yticklabels(x, fontsize=10)
+    ax2.set_xlabel(r'$t$ ',fontsize=16)
+    # ax2.set_xticklabels(x, fontsize=10)
+    ax2.set_ylabel(r'$ L_{\infty}$-norm   ',fontsize=16)
+    ax2.xaxis.set_tick_params(labelsize=14)
+    ax2.yaxis.set_tick_params(labelsize=14)
+    # ax2.set_yticklabels(x, fontsize=10)
+
+            
+    ax1.plot( nnt, Linf_e, 'r-')
+    ax2.plot( nnt, Linf_p, 'r-')
+
         # ax1.legend(loc=2)
         # ax2.legend(loc=1)
         # ax3.legend(loc=2)
