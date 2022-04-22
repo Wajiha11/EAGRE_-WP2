@@ -2,8 +2,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Dec  8 10:35:43 2021
-
 @author: mmwr
 """
 
@@ -16,6 +14,8 @@ Select the case:
     case 1 : Linear SWE VP solved by firedrake to compute the weak formulations by using fd. derivative 
             ( can be turned into nonlinear by putting the value of alp = 1 )
     case 2 : Non-Linear SWE VP solved by firedrake to compute the weak formulations by using fd. derivative
+    
+    Note: you can turn the wave-maker on and off for both cases by putting start_wavemaker = 1 and 0, respectively.
 '''
 case = 1
 start_wavemaker = 0 # (start_wavemaker = 1 => wavemaker started to move)
@@ -508,75 +508,10 @@ elif case == 2:
         phi.assign(phi_new)
         h.assign(h_new)
 
-    
-elif case == 3:
-      
-    print('You have selected case 3: Solves weak formulations; first calculates h^n+1 and then calculates phi^(n+1)')
-    
-    x = fd.SpatialCoordinate(mesh)
-    y = 0
-    x_coord = fd.Function(V).interpolate(x[0])
- 
-    piston = 1 #( Choose piston = 1 to solve for Nonlinear SWE with piston wavemaker  )
-    
-    if piston == 1:
-        ### Nonlinear SWE with piston wavemaker  ####
-        print(" Nonlinear SWE with piston wavemaker ")
-        h2_full =  ( fd.inner((h_new - h)/dt,v) + fd.inner(Rht * ((x_coord - Lw)/(Lw - Rh)) * h.dx(0), v) \
-                +  ((Lw/(Lw - Rh)))**2 * fd.inner((h_new * phi.dx(0)).dx(0),v)  )* fd.dx + ((Lw/(Lw - Rh))*h_new*phi.dx(0) *v \
-                - Rt*h_new*v)*fd.ds(1) # - Rht*h*v *fd.ds(1)
-                ### + v * ((Lw/(Lw - Rh)))**2 * fd.inner(fd.grad(h,fd.grad(phi))  )* fd.dx
-    
-        phi2_full = ( fd.inner((phi_new - phi)/dt, v) + v * ((x_coord - Lw)/(Lw - Rh))*Rht * phi.dx(0) \
-                  + 0.5 * ((Lw)/(Lw - Rh))**2 *(fd.inner(fd.grad(phi), fd.grad(phi))) * v + g*(h_new - H0)*v ) * fd.dx #- Rht*h*fd.grad(phi)*fd.ds(1)
-    else:             
-        ### Nonlinear SWE without piston wavemaker  ####
-        print(" Nonlinear SWE without piston wavemaker ")
-        h2_full =   (fd.inner((h_new - h)/dt, v) + fd.inner((h * phi.dx(0)).dx(0),v))* fd.dx          
-    
-        phi2_full = (fd.inner((phi_new - phi)/dt, v) + 1/2 * fd.inner(phi.dx(0), phi.dx(0))*v + g*(h - H0)*v)*fd.dx
-        
-    
-        ###### Solve #####
-    
-    h2_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(h2_full, h_new))
-    phi2_full = fd.NonlinearVariationalSolver(fd.NonlinearVariationalProblem(phi2_full, phi_new) )
-    
-    
-    ###### OUTPUT FILES ##########
-    outfile_phi = fd.File("results_NonLinSWE_case3/phi.pvd")
-    outfile_eta = fd.File("results_NonLinSWE_case3/h.pvd")
-    
-    while t<= t_end:
-        h2_full.solve()
-        t+= dt
-        phi2_full.solve()
-        outfile_eta.write( h_new )
-        outfile_phi.write( phi_new )
-        
-        # set-up next time-step
-        phi.assign(phi_new)
-        h.assign(h_new)
-        
-    eta2vals = np.array([h_new.at(x, 0.5) for x in xvals])
-    phi2vals = np.array([phi_new.at(x, 0.5) for x in xvals])
-    # print('phi_case2 =', phi2vals)
-    # print('h_case2 =', eta2vals)
-    
-    ax1.plot(xvals, eta2vals, label = 'Case3 : $h$')
-    ax1.legend(loc=2)
-    ax2.plot(xvals,phi2vals, label = 'Case3 : $\phi$')
-    ax2.legend(loc=1)
 else:
     print(" The selected number does not match any case")
     
     
-# ax1.plot(xvals, etaevals, '--',label = '$Exact: \eta_x$ ')
-# ax1.legend(loc=2)
-# ax2.plot(xvals, phievals, '--',label = '$Exact: \phi_x$ ')
-# ax2.legend(loc=1)
-# ax3.plot(yvals, etaevalsy, '--',label = '$Exact: \eta_y$ ')
-# ax4.plot(yvals, phievalsy, '--',label = '$Exact: \phi_y$ ')
     
 plt.show()     
     
