@@ -8,11 +8,12 @@ Use SWE_p3.py for the modelling of numerical wave tank with piston wave-maker by
 
 # Energy monitoring for linear shallow water equations with piston wavemaker
 Use SWE_lin_energy.py file to monitor the enrgy of the system with linear shallow water equations. In input paramerter section, you will find following options:
--case = 1
--start_wavemaker = 1 # (start_wavemaker = 1 => wavemaker started to move, start_wavemaker = 2 => Wavemaker starts and then stops)
--ic = 1                                                     #  ic = 1 to use ics = func, ic = 0 use ics as 0 
--settings = 2                                               # settings for wavemaker, 1 == original , 2 == yangs settings
--alp = 1
+
+- case = 1
+- start_wavemaker = 1 # (start_wavemaker = 1 => wavemaker started to move, start_wavemaker = 2 => Wavemaker starts and then stops)
+- ic = 1                                                     #  ic = 1 to use ics = func, ic = 0 use ics as 0 
+- settings = 2                                               # settings for wavemaker, 1 == original , 2 == yangs settings
+- alp = 1
 
 The description of initial parameters is as follows:
 
