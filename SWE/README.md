@@ -20,3 +20,9 @@ The description of initial parameters is as follows:
 - ic value corresponds to either you want to assign zero or non-zero initial conditions for eta and phi. If ic = 1 then non-zero initial conditions will be   assigned for eta and phi while ic = 0 will assign zero initial conditions to eta and phi.
 - settings = 1 corresponds to wavemaker motion, i.e. gamma Re (exp^(- i * sigma * t)), while settings = 2 corresponds to wavemaker motion mentioned in Yang's code i.e. -gamma*cos(w*t). The purpose to settings = 2 is to compare the current code with Yang's case. 
 - alp = 0 corresponds to fully linear equations while alp = 1 corresponds to nonlinear equations with linear domain.
+
+# Energy monitoring for non-linear shallow water equations with piston wavemaker (SWE_energy.py)
+The code file SWE_energy.py can solve linear as well as nonlinear shallow water equations with and without piston wavemaker. The user should coose
+- case = 1 for linear case and then put alp = 0 
+- case = 1 for linear case and then put alp = 1 to do a case with nonlinear equations with linear domain
+- case = 2 for fully nonlinear SWE
