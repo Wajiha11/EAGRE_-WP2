@@ -18,10 +18,10 @@ print('#####################################################################')
 
 
 case = 1
-start_wavemaker = 1 # (start_wavemaker = 1 => wavemaker started to move, start_wavemaker = 2 => Wavemaker starts and then stops)
-ic = 1                                                     #  ic = 1 to use ics = func, ic = 0 use ics as 0 
+start_wavemaker = 2 # (start_wavemaker = 1 => wavemaker started to move, start_wavemaker = 2 => Wavemaker starts and then stops)
+ic = 0                                                     #  ic = 1 to use ics = func, ic = 0 use ics as 0 
 settings = 2                                               # settings for wavemaker, 1 == original , 2 == yangs settings
-alp = 1
+alp = 0
 dt = 0.02 #0.0005 # dx/(16*np.pi)
 print('Time step size =', dt)
 
@@ -97,7 +97,6 @@ tsize = 18 # font size of image title
 size = 16 # font size of image axes
 t = 0
 
-
 ##__________________   Parameters for wave   _____________________##
 print("#####################################################################")
 print('########################   PARAMETERS  of Wave  #####################')
@@ -112,7 +111,6 @@ print('Wavenumber in x direction (k1) =',k1)
 
 k2 = 0 #(2* fd.pi * m2) /Ly
 print('Wavenumber in y direction (k2)  =',k2)
-
 
 w = c * np.sqrt(k1**2 + k2**2)
 print('wave frequency (w)',w )
@@ -134,7 +132,7 @@ print('Gamma =', gamma)
 if gamma >= Lw:
     print(" The wavelength of the wavemaker should be less than Lw")
 
-lamb = 15 #13 #13 #15 #40 #60 # 0.5                                 # Wavelength
+lamb = 15 #13 #13 #15 #40 #60 # 0.5                         # Wavelength
 print('Wavelength of wavemaker=', lamb)
 
 kp = 2*fd.pi/lamb                                           # Wave number
@@ -162,7 +160,6 @@ w_pot =  ( np.sqrt(g* k_plot * np.tanh(k_plot*H0)))
 w_shallow = c * np.sqrt(k_plot**2)
 Time_period = 2*fd.pi/w_pot
 
-
 fig, ((ax1, ax2)) = plt.subplots(2)
 ax1.set_title(" Wave frequency ($\omega$) vs. wave number (k)")
 ax1.plot(k_plot, w_pot,  'k--',label = '$Potential$')
@@ -170,7 +167,6 @@ ax1.plot(kp, sigma,  'ro')
 ax1.plot(k_plot, w_shallow , 'r--', label = '$Shallow$')
 ax1.set_xlabel('k ')
 ax1.set_ylabel('$\omega $ ')
-# ax2.set_xlim([19, 1000])
 ax1.legend(loc=1)
 
 ax2.plot(k_plot,w_pot,   'k--',label = '$Potential$')
@@ -193,7 +189,8 @@ x2 = int(len(time)/2)
 t_plot = np.array([ time[1], time[x2], time[-1] ])
 print("t_plot =", t_plot)
 
-
+lim = int(len(time)/4)
+lim1 = time[lim]
 ##___________________ Parameters for IC _________________________##
 if ic == 1:
     print('#################################################################')
@@ -319,7 +316,9 @@ print('Plot of wavemaker motion')
 Rt1=[]
 Rh1 = []
 lim = int(len(time)/4)          # time after which wavemaker stops
-
+if start_wavemaker == 2:
+        print('The wavemaker will stop after time step =',lim) 
+        
 for nt in range(len(nnt)): 
     if start_wavemaker  == 1:
         if settings == 1:
@@ -330,7 +329,6 @@ for nt in range(len(nnt)):
             Rt_1 = gamma*sigma*fd.sin(sigma*t)
             
     elif start_wavemaker  == 2:
-        print('The wavemaker will stop after time step =',lim) 
         if nt <= lim: 
             if settings == 1:
                 R_h1 = -gamma *(np.exp(-1j * sigma *t)).real 
@@ -360,7 +358,6 @@ if start_wavemaker == 1:
 else:
     pass   
 
-# plt.figure(3)
 fig, (ax1, ax2) = plt.subplots(2)
 
 ax1.set_title('Wavemaker motion',fontsize=tsize)
@@ -426,15 +423,20 @@ if case == 1:
     outfile_phi = fd.File("results_Lin_SWE_case1/phi.pvd")
     outfile_eta = fd.File("results_Lin_SWE_case1/eta.pvd")
     
-    ###________________  TIME LOOP _________________##
+    ###________________  TIME LOOP _________________###
  
     while (t <= t_end):
+        if start_wavemaker  == 2:       
+            if t > lim1:
+                Rt.assign(0) 
+                Rh.assign(0) 
+                Rht.assign(0) 
+                
         eta_expr.solve()
         
         phi_expr.solve()
         
         t+= dt
-        
 
         Epp = fd.assemble(( 1/2 * g * fd.inner(eta,eta) )* fd.dx)
         Ekk = fd.assemble(0.5 * H0* (fd.grad(phi)**2 * fd.dx))
@@ -488,36 +490,7 @@ if case == 1:
     plt.plot(time, E1_t )
     plt.grid()
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+      
         
 plt.show()     
 print('*************** PROGRAM ENDS ******************')
