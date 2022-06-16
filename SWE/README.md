@@ -6,7 +6,7 @@ It is done to compare the two approaches to solve the system of equations. One o
 Use SWE_p3.py for the modelling of numerical wave tank with piston wave-maker by using linear/non-linear Shallow water equations in one dimensional domain.
 
 
-# Energy monitoring for linear shallow water equations with piston wavemaker
+# Energy monitoring for linear shallow water equations with piston wavemaker (SWE_lin_energy.py)
 Use SWE_lin_energy.py file to monitor the enrgy of the system with linear shallow water equations. In input paramerter section, you will find following options:
 
 - case = 1
