@@ -17,7 +17,7 @@ print('######################  Initial parameters  #########################')
 print('#####################################################################')
 
 
-case = 2
+case = 1
 start_wavemaker = 0 # (start_wavemaker = 0 => Does not move at all  , start_wavemaker = 1 => wavemaker keeps moving, start_wavemaker = 2 => Wavemaker starts and then stops)
 ic = 0                                                     #  ic = 1 to use ics = func, ic = 0 use ics as 0 
 settings = 2                                               # settings for wavemaker, 1 == original , 2 == yangs settings
