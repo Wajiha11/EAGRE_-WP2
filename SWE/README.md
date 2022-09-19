@@ -16,7 +16,7 @@ Use SWE_lin_energy.py file to monitor the enrgy of the system with linear shallo
 - alp = 1
 
 The description of initial parameters is as follows:
-
+- case value decides either time discrete VP will be based on Symplectic Euler (SE) scheme or Stormer Verlet (SV) schmeme.
 - ic value corresponds to either you want to assign zero or non-zero initial conditions for eta and phi. If ic = 1 then non-zero initial conditions will be   assigned for eta and phi while ic = 0 will assign zero initial conditions to eta and phi.
 - settings = 1 corresponds to wavemaker motion, i.e. gamma Re (exp^(- i * sigma * t)), while settings = 2 corresponds to wavemaker motion mentioned in Yang's code i.e. -gamma*cos(w*t). The purpose to settings = 2 is to compare the current code with Yang's case. 
 - alp = 0 corresponds to fully linear equations while alp = 1 corresponds to nonlinear equations with linear domain.
