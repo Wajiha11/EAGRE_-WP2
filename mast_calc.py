@@ -19,13 +19,12 @@ import math as m
 
 ## Initial parameters
 
-
 num_modes = 2
 nodes = 100
-L = 1.5                                              # Length  [m]
+L = 2                                      # Length  [m]
 print('The length of the beam in m is:', L)
-wall_thickness_mm = 1.2                            # [mm]
-dia_mm = 10                                        # diameter [mm]
+wall_thickness_mm = 2.5                   # [mm]
+dia_mm = 125                                     # diameter [mm]
 x = np.linspace(0, L, nodes+1)
 
 ## Convert mm to m
@@ -39,7 +38,7 @@ area = m.pi * ( (r_out )**2 - (r_in)**2 )           # [m^2]
 
 
 # material properties
-rho = 40                                            # density [ kg/m^3 ]
+rho = 1400 #1450                                            # density [ kg/m^3 ]
 m_L =  rho * area                                   # mass per length [kg m^-1] 
 E = 3e+09                                           # Modulus Elasticity [N/m^2]
 
@@ -62,13 +61,13 @@ while i <= num_modes:
     lam[i] = (2*i - 1) * m.pi/2 
     i+= 1
     
-## calculate sigma
+## calculate sigma ( σ_i )
 sigma= np.ones(num_modes+1)
  
 if num_modes == 0:
       lam[0] = 1
-      
       sigma[0] = 0
+      
 elif num_modes == 1:
     lam[0] = 1
     lam[1] = 1.87510407
@@ -124,6 +123,8 @@ else:
 ## calculate modes
 y = np.zeros((num_modes+1, nodes+1))
 i = 0
+
+#  modes = cosh(λ_i *x/L) - np.cos(λ_i *x/L) -  σ_i *( np.sinh(λ * x/L) - sin(λ * x/L))
 while i <= num_modes: 
     y[i, :] = np.cosh(lam[i] *x/L) - np.cos(lam[i] *x/L)\
                 - sigma[i]*( np.sinh(lam[i] * x/L) - np.sin(lam[i]*x/L))
@@ -143,31 +144,20 @@ plt.grid()
 plt.legend(loc=4)
 
 # calculate frequency and time period corresponding to each mode
+# frequency = ( λ_i^2 / 2* pi * L^2)  * (EI/m)^1/2
 fre = np.zeros(num_modes+1) 
 i = 0
 while i <= num_modes: 
     fre[i] = ( (lam[i]**2)/(2*m.pi* (L**2))) * m.sqrt( E * Ixc /m_L)
     i+= 1
 
-fr = fre[0:-1]      # remove the first elemet as it corresponds to zero mode
+fr = fre[1:]      # remove the first elemet as it corresponds to zero mode
 
 print('Frequencies = ', fr)
 T_n = 1/fr          # natural time period
 print('Time period = ', T_n)
 
 
+plt.show()
 
-# make table for the data
-
-# data = np.stack((fr, T_n), axis=1)
-# print(data)
-
-# #define header names
-# col_names = ["Frequency", "Time period"]
-  
-#display table
-# print(tabulate(data, headers=col_names, tablefmt="fancy_grid", showindex="always"))
-
-
-
-
+print('*************** PROGRAM ENDS ******************')
