@@ -19,7 +19,7 @@ nz = 6
 # control parameters
 output_data_every_x_time_steps = 20  # to avoid saving data every time step
 
-save_path =  "pot_try2" 
+save_path =  "lin_pot_flow" 
 if not os.path.exists(save_path):
     os.makedirs(save_path)                                       
 
