@@ -119,9 +119,9 @@ if nic == 0:
     eta_exact_expr = A * fd.cos(kx * x[0]) * np.cos(omega * t0)
     t_end = Tperiod  # time of simulation [s]
     dtt = np.minimum(Lx/nx,Lz/nz)/(np.pi*np.sqrt(gg*H0)) # i.e. dx/max(c0) with c0 =sqrt(g*H0)
-    Nt = 500 # check with print statement below and adjust dt towards dtt vi Nt halving time step seems to half energy oscillations
-    CFL = 0.5 # run at a) 0.125 and b) 0.5*0.125
-    dt = CFL*Tperiod/Nt  # 0.005  # time step [s]
+    Nt = 500 
+    CFL = 0.5 
+    dt = CFL*Tperiod/Nt  # time step [s]
     print('dtt=',dtt, t_end/dtt,dt,2/omega) 
     
     ##______________  To get results at different time steps ______________##
