@@ -148,7 +148,7 @@ elif nic == 1:
 
     
     dtt = np.minimum(Lx/nx,Lz/nz)/(np.pi*np.sqrt(gg*H0)) # i.e. dx/max(c0) with c0 =sqrt(g*H0)
-    Nt = 500 # check with print statement below and adjust dt towards dtt vi Nt halving time step seems to half energy oscillations
+    Nt = 500
     CFL = 0.5
     dt = CFL*Tperiod/Nt    # time step 
     print('dtt=',dtt, t_end/dtt,dt,2/omega)
