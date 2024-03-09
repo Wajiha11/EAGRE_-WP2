@@ -13,8 +13,6 @@ from sympy import summation
 from sympy.abc import k
 import matplotlib.pyplot as plt
 import os
-from FIAT.reference_element import UFCInterval
-from FIAT.quadrature import GaussLobattoLegendreQuadratureLineRule
 
 
 print('#####################################################################')
